@@ -25,18 +25,28 @@ namespace dotnetvddk
             int length = 1; // try to read 1 block
             var buffer = new Byte[length * 512];
 
+            // Mono + VDDK64
+            var connParams64 = new VixDiskLibConnectParams51x64();
+            connParams64.ServerName = server;
+            connParams64.CredType = VixDiskLibCredType.VIXDISKLIB_CRED_UID;
+            connParams64.UserName = user;
+            connParams64.Password = password;
+            connParams64.Port = 902;
+            connParams64.VmxSpec = "moref=" + moref; //"moref=2";
 
-            var connParams = new VixDiskLibConnectParams51x64();
-            connParams.ServerName = server;
-            connParams.CredType = VixDiskLibCredType.VIXDISKLIB_CRED_UID;
-            connParams.UserName = user;
-            connParams.Password = password;
-            connParams.Port = 902;
-            connParams.VmxSpec = "moref=" + moref; //"moref=2";
+            // Windows + VDDK64
+            var connParams32 = new VixDiskLibConnectParams51x32();
+            connParams32.ServerName = server;
+            connParams32.CredType = VixDiskLibCredType.VIXDISKLIB_CRED_UID;
+            connParams32.UserName = user;
+            connParams32.Password = password;
+            connParams32.Port = 902;
+            connParams32.VmxSpec = "moref=" + moref; //"moref=2";
 
 
             var libdir = "/usr/lib/vmware-vix-disklib/lib64";
             var configfile = "./vddk.conf";
+
 
             if (Environment.OSVersion.Platform != PlatformID.Unix) {
                 var vddkPath = string.Concat(AppDomain.CurrentDomain.BaseDirectory, "vddk_x64"); //vddk64 lib must be in app base directoy \vddk_x64
@@ -55,7 +65,16 @@ namespace dotnetvddk
             IntPtr vixConnHandle = IntPtr.Zero;
             IntPtr vixDiskHandle;
 
-            status = VixDiskLib.VixDiskLib_Connect(connParams, ref vixConnHandle);
+
+            if (Environment.OSVersion.Platform == PlatformID.Unix)
+            {
+                status = VixDiskLib.VixDiskLib_Connect(connParams64, ref vixConnHandle);
+            }
+            else
+            {
+                status = VixDiskLib.VixDiskLib_Connect(connParams32, ref vixConnHandle);
+            }
+
             Console.WriteLine("64-bit - VixDiskLib_Connect() - result: " + status + " - handle: " + vixConnHandle + Environment.NewLine);
             status = VixDiskLib.VixDiskLib_Open(vixConnHandle, vmdkpath, 4, out vixDiskHandle);
             Console.WriteLine("64-bit - VixDiskLib_Open() - result: " + status + " - handle: " + vixDiskHandle +  Environment.NewLine);

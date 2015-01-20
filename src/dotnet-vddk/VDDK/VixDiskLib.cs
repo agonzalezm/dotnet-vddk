@@ -65,6 +65,7 @@ namespace VDDK
         public IntPtr ticketId;
     }
 
+    // Use in Linux/Mono because 'long' on Linux x64 is 8 bytes, and 4 bytes everywhere else
     [StructLayout(LayoutKind.Sequential, Pack = 8, CharSet = CharSet.Ansi)]
     public class VixDiskLibConnectParams51x64
     {
@@ -78,6 +79,22 @@ namespace VDDK
         private IntPtr Dummy;
         public UInt32 Port;
     }
+
+    // Use on Windows x64 + VDDK 64
+    [StructLayout(LayoutKind.Sequential, Pack = 4, CharSet = CharSet.Ansi)]
+    public class VixDiskLibConnectParams51x32
+    {
+        public string VmxSpec;      // URL like spec of the VM.
+        public string ServerName;   // Name or IP address of VC / ESX.
+        public string ThumbPrint;   // SSL Certificate thumb print.
+        private Int32 PrivateUse;    // This value is ignored.
+        public VixDiskLibCredType CredType;
+        public string UserName;     // User id
+        public string Password;     // Password
+        private IntPtr Dummy;
+        public UInt32 Port;
+    }
+
 
     [StructLayout(LayoutKind.Sequential)]
     public class VixDiskLibConnectParams
